@@ -74,12 +74,13 @@ class Switch:
  #   def turn_off(self):
  #       self.__position = 0
         
-#     def toggle(self):
-#         if self.__position == 0:
-#             self.__position = 1
-#         else:
-#             self.__position = 0
-            
+    def toggle(self):
+        if self.__position == 0:
+            self.__position = 1
+        elif self.__position == 1:
+            self.__position = 0
+        if self.__position == 2 or self.__position == 3:
+            raise Exception("Invalid position")
 #     def cycle(self):
 #         if self.__position == 0:
 #             self.__position = 1
@@ -93,7 +94,7 @@ class Switch:
 #         if self.position == self.pos_enum.index(self.pos_enum[-1]):
 #             self.position = 0
 #         else:
-#             self.position += 1
+#             self.position += 1
                 
 class LED:
     
@@ -128,13 +129,21 @@ class LED:
 #         # if self.__switch_off_handler is not None:
 #             self.__switch_off_handler()
 #     # функция, которая применяется позже для изменения состояния лампочек(выключает)
+    def delay1(self):
+       time.sleep(1)
+        
+    def delay2(self):
+        time.sleep(1)
+
+
 
     def toggle(self):
         if self.__status == 0:
             self.switch_on()
-            
         else:
             self.switch_off()
+
+            
         
         
 
@@ -142,31 +151,42 @@ class LED:
 
 class ButtonView(tk.Tk):
 
-    __caption = "Toggle"
+#    __caption1 = "Circle"
+#    __caption2 = "Switch"
     __clickHandler = None
+    __clickHand = None
 
-    def __init__(self, text, command):
+    def __init__(self, text1, text2, command1, command2):
         super().__init__()
-        self.__caption = text
-        self.__clickHandler = command
-        self.btn = tk.Button(self, text="Toggle", command=self.click)
-        self.btn.pack(padx=120, pady=30)
-    def click(self):
+#        self.__caption1 = text
+#        self.__caption2 = text
+        self.__clickHandler = command1
+        self.__clickHand = command2
+        self.btn1 = tk.Button(self, text="Circle", command=self.click1)
+        self.btn1.pack(padx=120, pady=30)
+        self.btn2 = tk.Button(self, text="Switch", command=self.click2)
+        self.btn2.pack(padx=120, pady=30)
+        
+    def click1(self):
         self.__clickHandler()
-    
+        
+    def click2(self):
+        self.__clickHand()
+
 class SwitchController:
     # TODO: дописать этот класс до конца
     __positionOnLed = None
     __positionOffLed = None
     __switchModel = None
 
-    def __init__(self, switch, ledOn, ledOff):
+    def __init__(self, switch, ledOn, ledOff, delay1, delay2):
         self.__switchModel = switch
-        self.__positionOnLed = switch
-        self.__positionOffLed = switch
         self.__positionOnLed = ledOn
         self.__positionOffLed = ledOff
+        self.__positionOnLed = delay1
+        self.__positionOffLed = delay2
         self.update_leds()
+        self.switch_leds()
         
     def update_leds(self):
         if self.__switchModel.get_position() == 0:
@@ -181,13 +201,34 @@ class SwitchController:
         if self.__switchModel.get_position() == 3:
             self.__positionOnLed.switch_on()
             self.__positionOffLed.switch_on()
+    def switch_leds(self):
+        if self.__switchModel.get_position() == 1:
+            self.__positionOffLed.switch_off()
+            self.__positionOnLed.delay1()
+#            self.__positionOffLed.delay1()
+            self.__positionOnLed.switch_on()
+        if self.__switchModel.get_position() == 0:
+            self.__positionOnLed.switch_off()
+            self.__positionOffLed.delay2()
+            self.__positionOffLed.switch_on()
+        if self.__switchModel.get_position() == 3:
+            self.__positionOffLed.switch_off()
+            self.__positionOnLed.switch_off()
+        if self.__switchModel.get_position() == 2:
+            self.__positionOffLed.switch_off()
+            self.__positionOnLed.switch_off()
+
+#             self.__positionOnLed.delay()
             
     
     def handleClick(self):
         self.__switchModel.cycle()
         self.update_leds()
         
-  #   def handleClickSwitch(self):
+    def handleClickSwitch(self):
+        self.__switchModel.toggle()
+        self.switch_leds()
+        
     
   #  def handleSwitchOnCommand(self):
         
@@ -197,7 +238,6 @@ class SwitchController:
         
   #  def handleSwitch(self):
   #      self.__switchModel.get_position()
-        
 if __name__ == "__main__":
     
     l1 = LED (12, 1)
@@ -212,13 +252,17 @@ if __name__ == "__main__":
         l1.toggle()
         l2.toggle()        
     
+    dl1 = LED (12, 1)
     
+    dl2 = LED (24, 1)
     
     #object_model = ButtonModel()
     
-    sw = Switch (0)
+    sw = Switch (2)
 
-    sw_ctl = SwitchController(switch = sw, ledOn = l1, ledOff = l2)
+    sw_ctl = SwitchController(switch = sw, ledOn = l1, ledOff = l2, delay1 = dl1, delay2 = dl2)
     
-    bt = ButtonView("Toggle", command = sw_ctl.handleClick)
+    bt = ButtonView("Circle", "Switch", command1 = sw_ctl.handleClick, command2 = sw_ctl.handleClickSwitch)
+ #   bt = ButtonView("Toggle", command = sw_ctl.handleClickSwitch)
     bt.mainloop()
+ 
