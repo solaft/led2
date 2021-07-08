@@ -77,9 +77,10 @@ class Switch:
     def toggle(self):
         if self.__position == 0:
             self.__position = 1
-        else:
+        elif self.__position == 1:
             self.__position = 0
-            
+        if self.__position == 2 or self.__position == 3:
+            raise Exception("Invalid position")
 #     def cycle(self):
 #         if self.__position == 0:
 #             self.__position = 1
@@ -135,10 +136,10 @@ class LED:
         time.sleep(1)
 
 
+
     def toggle(self):
         if self.__status == 0:
             self.switch_on()
-            
         else:
             self.switch_off()
 
@@ -210,7 +211,12 @@ class SwitchController:
             self.__positionOnLed.switch_off()
             self.__positionOffLed.delay2()
             self.__positionOffLed.switch_on()
-            
+        if self.__switchModel.get_position() == 3:
+            self.__positionOffLed.switch_off()
+            self.__positionOnLed.switch_off()
+        if self.__switchModel.get_position() == 2:
+            self.__positionOffLed.switch_off()
+            self.__positionOnLed.switch_off()
 
 #             self.__positionOnLed.delay()
             
@@ -246,13 +252,13 @@ if __name__ == "__main__":
         l1.toggle()
         l2.toggle()        
     
-    dl1 = LED (12, 0)
+    dl1 = LED (12, 1)
     
-    dl2 = LED (24, 0)
+    dl2 = LED (24, 1)
     
     #object_model = ButtonModel()
     
-    sw = Switch (1)
+    sw = Switch (2)
 
     sw_ctl = SwitchController(switch = sw, ledOn = l1, ledOff = l2, delay1 = dl1, delay2 = dl2)
     

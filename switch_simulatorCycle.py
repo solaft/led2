@@ -187,7 +187,7 @@ class SwitchController:
         self.__switchModel.cycle()
         self.update_leds()
         
-     def handleClickSwitch(self):
+  #   def handleClickSwitch(self):
     
   #  def handleSwitchOnCommand(self):
         
