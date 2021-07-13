@@ -1,7 +1,6 @@
 import tkinter as tk
 import RPi.GPIO as GPIO
 import time
-import threading
 from itertools import cycle
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
@@ -58,7 +57,9 @@ class Switch:
     INVALID = pos_enum.index(3)
     def __init__(self, position, gpio_pin_btn, delay=0):
         self.__gpio_pin_btn = gpio_pin_btn
-        GPIO.setup(gpio_pin_btn, GPIO.IN)  
+        GPIO.setup(gpio_pin_btn, GPIO.IN)
+        GPIO.setup(12, GPIO.OUT)
+        GPIO.setup(24, GPIO.OUT)
         """Cчитывается """
         if type(position) == int:
             if position < 0 or position > 3:
@@ -129,27 +130,15 @@ class Switch:
             raise Exception("Invalid position")
         
     def btn_switch_condition(self):
-        if GPIO.input(self.__gpio_pin_btn) == GPIO.LOW:
-            self.__position = 1
-        if GPIO.input(self.__gpio_pin_btn) == GPIO.HIGH:
-            self.__position = 0
-                
-    def btn_cycle_condition(self):
-        if GPIO.input(self.__gpio_pin_btn) == GPIO.LOW:
-            self.__position = 1
-        if GPIO.input(self.__gpio_pin_btn) == GPIO.HIGH:
-            self.__position = 0
-        if GPIO.input(self.__gpio_pin_btn) == GPIO.LOW:
-            self.__position = 2
-        if GPIO.input(self.__gpio_pin_btn) == GPIO.LOW:
-            self.__position = 3
-
-
-
-            
-   
-
-
+        while True:
+            if GPIO.input(self.__gpio_pin_btn) == GPIO.LOW:
+                GPIO.output(12, GPIO.LOW)
+                time.sleep(1)
+                GPIO.output(24, GPIO.HIGH)                
+            if GPIO.input(self.__gpio_pin_btn) == GPIO.HIGH:
+                GPIO.output(24, GPIO.LOW)
+                time.sleep(1)
+                GPIO.output(12, GPIO.HIGH)
 #     def btn_cycle_condition(self):
 #     def cycle(self):
 #         if self.__position == 0:
@@ -160,7 +149,7 @@ class Switch:
 #             self.__position = 3
 #         elif self.__position == 3:
 #             self.__position = 0
-# #     def cycle(self):
+#     def cycle(self):
 #         if self.position == self.pos_enum.index(self.pos_enum[-1]):
 #             self.position = 0
 #         else:
@@ -241,7 +230,7 @@ class ButtonView(tk.Tk):
     def click2(self):
         self.__clickHand()
 
-class SwitchController():
+class SwitchController:
     
     __positionOnLed = None
     __positionOffLed = None
@@ -310,41 +299,28 @@ class SwitchController():
         self.switch_leds()
         
     def handle_button_switch(self):
-        while True:
-            self.__switchModel.btn_switch_condition()
-            self.switch_leds()
+        self.__switchModel.btn_switch_condition()
         
-    def handle_button_cycle(self):
-        while True:
-            self.__switchModel.btn_switch_condition()
-            self.switch_leds()
-#     def run(self):
-
+#     def handle_button_cycle(self):
+#         self.__switchModel.btn_cycle_condition()
+#         self.update_leds()
 
         
         
 if __name__ == "__main__":
     
-    l1 = LED (12, 0)
+    l1 = LED (12, 1)
     
-    l2 = LED (24, 1)
+    l2 = LED (24, 0)
     
     sw = Switch (1, 3, 1)
-    
+
     sw_ctl = SwitchController(switch = sw, ledOn = l1, ledOff = l2)
-
-#     sw_ctl.handle_button_switch()
-#     sw_ctl.handle_button_cycle()
-
+    
+    sw_ctl.handle_button_switch()
+    
+    SwitchController(switch = sw, ledOn = l1, ledOff = l2)    
     btVirtual = ButtonView("Circle", "Switch", command1 = sw_ctl.handleClick, command2 = sw_ctl.handleClickSwitch)
+    btVirtual.mainloop()
     
-    thread_real_button = threading.Thread(target=sw_ctl.handle_button_switch())
-    thread_virtual_button = threading.Thread(target=sw_ctl.handleClick())
-
-    thread_real_button.start()
-    thread_virtual_button.start()
     
-    thread_real_button.join()
-    thread_virtual_button.join()    
-
-
