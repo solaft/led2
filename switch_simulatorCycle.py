@@ -93,7 +93,7 @@ class Switch:
 #         if self.position == self.pos_enum.index(self.pos_enum[-1]):
 #             self.position = 0
 #         else:
-#             self.position += 1
+#             self.position += 1
                 
 class LED:
     
@@ -187,7 +187,7 @@ class SwitchController:
         self.__switchModel.cycle()
         self.update_leds()
         
-     def handleClickSwitch(self):
+  #   def handleClickSwitch(self):
     
   #  def handleSwitchOnCommand(self):
         
@@ -222,5 +222,3 @@ if __name__ == "__main__":
     
     bt = ButtonView("Toggle", command = sw_ctl.handleClick)
     bt.mainloop()
- 
-
